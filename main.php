@@ -275,8 +275,8 @@ function get_dirty_order_data() {
       global $dirty_order_header;
       global $dirty_order_product;
 
-	$order_statuses	= array_keys( wc_get_order_statuses() );
-	
+	#$order_statuses	= 'wc-processing'; array_keys( wc_get_order_statuses() );
+	$order_statuses = array('wc-processing'); 
 
 	$args = array( 'post_type'=>'shop_order', 'posts_per_page'=>-1, 'post_status'=> apply_filters( 'wpg_order_statuses', $order_statuses ) );
 
