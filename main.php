@@ -178,6 +178,10 @@ function product_info( $order_details ) {
 	$items_list = array();
 
 	$items = $order_details->get_items();
+      #print "<pre>";
+      #$product = new WC_Product($item['item_meta']['variation_id'][0]);
+      #$available_variations = $order_details->get_available_variations();
+      #print_r($available_variations);
 
 	if ( !empty( $items ) ) {
 
@@ -187,7 +191,8 @@ function product_info( $order_details ) {
 
 			#print "\nITEM:\n";
 			#print_r($item);
-			
+
+
 			$item_post = get_post_meta($item['item_meta']['_product_id'][0]);
 			#print "\nITEM post meta:\n";
 			#print_r($item_post);
@@ -196,6 +201,14 @@ function product_info( $order_details ) {
 			$price = $item_post['_price'][0];
 			$sku = $item_post['_sku'][0];
 			#print "SKU: $sku";
+
+                  #override sku with variation sku if exist
+                  if(! empty($item['item_meta']['_variation_id'][0])){
+                        $product = new WC_Product($item['item_meta']['_variation_id'][0]);
+                        $sku = $product->get_sku();
+                        #print "\n$vsku";
+
+                  }
 
 			$order_attrs = array();
 	/*		foreach( $metadata as $meta ) {
@@ -251,6 +264,7 @@ function product_info( $order_details ) {
 		} # end item loop
 		
 	} # end if
+      
 	return $items_list;
 }
 
@@ -278,6 +292,7 @@ function get_dirty_order_data() {
 	array_push($all_items, $dirty_order_header);
       $dopc=0;
 	while( $orders->have_posts() ) {
+
 		$orders->the_post();
 		
 		$order_details = new WC_Order( get_the_ID() );
