@@ -89,14 +89,14 @@ function dirty_filler(){
 		<input type='submit'>
 	</form>
 
-<?
+<?php
 
 	print "<h2>Import proccessed orders</h2>";
 		?>
 	<form>
 		<input type='file' >
 	</form><br><br><br><hr><pre>
-	<?
+	<?php
 
 }
 
