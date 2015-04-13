@@ -4,8 +4,8 @@
  * Plugin URI: http://paxinstruments.com
  * Description: Exports woo stuff
  * Version: 1.0.0
- * Author: Christopher Pax
- * Author URI: http://github.com/paxmanchis
+ * Author: Paxintruments
+ * Author URI: http://github.com/paxinstruments
  * License: GPL2
  * License URI: http://www.gnu.org/licenses/gpl-2.0.html
  */
