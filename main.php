@@ -47,9 +47,9 @@ function dirty_admin(){
 	if(! empty($_POST)){
 		#print_r($_POST);
 		if(isset($_POST['action']) and $_POST['action'] == 'wpg_dirty_order_export'){
-                  print "<pre>"; 
-                  print_r(get_dirty_order_data());
-                  die();
+                  #print "<pre>"; 
+                  #print_r(get_dirty_order_data());
+                  #die();
 			proccess_cvs(get_dirty_order_data());
 			#print "proccess cvs:<pre>";
 			#print_r(get_dirty_order_data());
@@ -240,7 +240,7 @@ function product_info( $order_details ) {
 
 			#print_r($order_attrs);
                   $json_code = json_encode($order_attrs);
-                  $json_code = ( empty($json_code) ) ? '' : $json_code;
+                  #$json_code = ( empty($json_code) ) ? '' : $json_code;
 			$attributes = $json_code;
 			$final_item = array($quantity,$price,$name,$sku,$attributes);
 			#array_push($items_list, $final_item);
@@ -291,6 +291,7 @@ function get_dirty_order_data() {
 		$ship = array( $order_id ,
 			$meta['_billing_email'][0],
 			$meta['_shipping_first_name'][0]." ".$meta['_shipping_last_name'][0],
+                  '', #company
 			$meta['_shipping_address_1'][0],
 			$meta['_shipping_address_2'][0],
 			$meta['_shipping_city'][0],
@@ -300,7 +301,7 @@ function get_dirty_order_data() {
 			'Residential',
 			'DHL',
 			$meta['_billing_phone'][0],
-			'',
+			'', #notes
 			$meta['_shipping_country'][0]
 
 		);
