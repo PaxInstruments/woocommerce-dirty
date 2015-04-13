@@ -34,7 +34,7 @@ add_action('admin_menu', 'dirty_admin');
 $dirty_order_header = array( "Order ID",	"Customer Email",	"Delivery Name", "Company", 
  					"Delivery Street",	"Delivery Suburb"	,"Delivery City",	
  					"Delivery State",	"Delivery Post Code",	"Delivery Country"	, "Ship Dest Type"	,
-					"Shipping Method"	, "Customers Telephone",	"Order Notes",	"ISO Country Code 2");	
+					"Shipping Method"	, "Tracking", "Customers Telephone",	"Order Notes",	"ISO Country Code 2");	
 # Product 0 Qty	Product 0 Price	Product 0 Name	Product 0 Model	Product 0 Attributes
 $dirty_order_product = array("Product # Qty", "Product # Price", "Product # Name", "Product # Model", "Product # Attributes");
 #if( !class_exists( 'wpg_order_export' ) ){
@@ -315,6 +315,7 @@ function get_dirty_order_data() {
 			$country_code_t,
 			'Residential',
 			'DHL',
+                  '', #Tracking
 			$meta['_billing_phone'][0],
 			'', #notes
 			$meta['_shipping_country'][0]
