@@ -333,14 +333,15 @@ function get_dirty_order_data() {
 		
 
 	}
-      
+
       for ($i=0; $i < $dopc; $i++) { 
             $dop = $dirty_order_product;
             foreach ($dop as $key => $value) {
                   $dop[$key] = str_replace("#", $dopc, $value);
             }
+            $all_items[0] = array_merge($all_items[0], $dop);
       }
-      $all_items[0] = array_merge($all_items[0], $dop);
+      
 
 	return $all_items;
 }
