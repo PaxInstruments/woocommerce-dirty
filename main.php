@@ -47,9 +47,11 @@ function dirty_admin(){
 	if(! empty($_POST)){
 		#print_r($_POST);
 		if(isset($_POST['action']) and $_POST['action'] == 'wpg_dirty_order_export'){
-                  #print "<pre>"; 
-                  #print_r(get_dirty_order_data());
-                  #die();
+                  print "<pre>show arrah:";
+
+                  #html_show_array(get_dirty_order_data());
+                  #exit;
+
 			proccess_cvs(get_dirty_order_data());
 			#print "proccess cvs:<pre>";
 			#print_r(get_dirty_order_data());
@@ -275,7 +277,7 @@ function get_dirty_order_data() {
       global $dirty_order_header;
       global $dirty_order_product;
 
-	#$order_statuses	= 'wc-processing'; array_keys( wc_get_order_statuses() );
+	#$order_statuses = array_keys( wc_get_order_statuses() );
 	$order_statuses = array('wc-processing'); 
 
 	$args = array( 'post_type'=>'shop_order', 'posts_per_page'=>-1, 'post_status'=> apply_filters( 'wpg_order_statuses', $order_statuses ) );
@@ -303,6 +305,12 @@ function get_dirty_order_data() {
 		$shipping_country = $meta['_shipping_country'][0];
 		$country_code_t = ( isset( $country_code[$shipping_country][0] ) ) ? $country_code[$meta['_shipping_country'][0]] : $meta['_shipping_country'];
 
+            #$order_details->get_shipping_methods(); gets more details
+            $shipping_method = $order_details->get_shipping_method();
+            # print "SHIPPINGMETHOD:"; print_r($shipping_method);
+            #print $shipping_method;
+            #exit;
+
 		$ship = array( $order_id ,
 			$meta['_billing_email'][0],
 			$meta['_shipping_first_name'][0]." ".$meta['_shipping_last_name'][0],
@@ -314,7 +322,7 @@ function get_dirty_order_data() {
 			$meta['_shipping_postcode'][0],
 			$country_code_t,
 			'Residential',
-			'DHL',
+			$shipping_method, #'DHL',
                   '', #Tracking
 			$meta['_billing_phone'][0],
 			'', #notes
@@ -323,6 +331,7 @@ function get_dirty_order_data() {
 		);
 		
 		#print_r($meta);
+
 		$items = product_info($order_details);
 
             if(count($items)/5 > $dopc) $dopc = count($items)/5;
@@ -599,4 +608,19 @@ $country_code = array(
       'ZM' => 'Zambia'  ,
       'ZW' => 'Zimbabwe' );
 
+
+
+function html_show_array($table){
+      echo "<table border='1'>";
+      foreach ($table as $rows => $row)
+      {
+            echo "<tr>";
+            foreach ($row as $col => $cell)
+            {
+            echo "<td>" . $cell . "</td>";
+       }     
+      echo "</tr>";
+      }
+      echo "</table>";
+}
 ?>
