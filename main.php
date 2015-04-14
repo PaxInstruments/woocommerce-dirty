@@ -43,8 +43,9 @@ $dirty_order_product = array("Product # Qty", "Product # Price", "Product # Name
 
 function dirty_admin(){
 	global $country_code;
-
+      
 	if(! empty($_POST)){
+            
 		#print_r($_POST);
 		if(isset($_POST['action']) and $_POST['action'] == 'wpg_dirty_order_export'){
                   print "<pre>show arrah:";
@@ -75,6 +76,26 @@ function dirty_admin(){
                   #echo json_encode( $response );
                   exit;
 		}
+            elseif (isset($_POST['action']) and ! empty($_FILES) and $_POST['action'] == 'wpg_dirty_order_import') {
+                  print "<pre>show arrah:";
+                  $upload_dir =   wp_upload_dir();
+                  $filename   =   $upload_dir['basedir']. '/dirty_order_import.csv';
+                  
+                  print_r($_FILES);
+                  print_r($_POST);
+
+                  $move_result = move_uploaded_file($_FILES['dirty_processing']['tmp_name'], $filename);
+                  $f = fopen($filename, 'r');
+                  $csv_data = array();
+                  while($line = fgetcsv($f)){
+                        array_push($csv_data, $line);
+                  }
+
+                  html_show_array($csv_data);
+                  print "</pre>";
+                  fclose($f);
+
+            }
 	}
 
 
@@ -88,15 +109,18 @@ function dirty_filler(){
 	<form method='post' id='mainform' action>
 		<input type="hidden" name="action" value="wpg_dirty_order_export" />
 		<input type="hidden" id="wpg_order_export_nonce" name="nonce" value="<?php echo wp_create_nonce('wpg_order_export') ?>" />
-		<input type='submit'>
+		<input type='submit' value='Export Orders'>
 	</form>
 
 <?php
 
 	print "<h2>Import proccessed orders</h2>";
 		?>
-	<form>
-		<input type='file' >
+	<form id='dirty_file_upload' enctype="multipart/form-data" method="POST" action>
+            <input type="hidden" name="MAX_FILE_SIZE" value="100000" />
+		<input type='file' name='dirty_processing' id='dirty_processing' />
+            <input type="hidden" name="action" value="wpg_dirty_order_import" />
+            <input type='submit' value='Import Orders'>
 	</form><br><br><br><hr><pre>
 	<?php
 
@@ -307,9 +331,9 @@ function get_dirty_order_data() {
 
             #$order_details->get_shipping_methods(); gets more details
             $shipping_method = $order_details->get_shipping_method();
-            # print "SHIPPINGMETHOD:"; print_r($shipping_method);
-            #print $shipping_method;
-            #exit;
+            print "meta:"; print_r($meta);
+
+            exit;
 
 		$ship = array( $order_id ,
 			$meta['_billing_email'][0],
