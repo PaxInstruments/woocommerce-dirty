@@ -93,19 +93,51 @@ function dirty_admin(){
                   $csv_data = array();
 
 
-
+                  $skip_first_line = true;
                   while($line = fgetcsv($f)){
                         #TODO: there is probaly a better way to handle this
                         array_push($csv_data, $line);
-
+                        if($skip_first_line){
+                              $skip_first_line = false;
+                              continue;
+                        }
                         $post_id = $line[0];
                         $courier_method = $line[11];
                         $tracking_number = $line[12];
 
+                        $meta_values = get_post_meta( $post_id );
+                        #$meta_values['_aftership_tracking_number'];
+                        #print_r($meta_values); 
+                        #print "here $post_id $meta_values <pre>";
+                        #print_r($meta_values);
+
                         if( ! isset( $courier_method_translation[$courier_method] ) 
-                              or empty($tracking_number) ) {
+                              or empty($tracking_number) ){
+                                    #print "\nskipping because tracking number missing or method not found.\n";
+                               continue;
+                              }
+
+                        if( 
+                              isset($meta_values['_aftership_tracking_number'])
+                              and ! empty($meta_values['_aftership_tracking_number'][0])
+
+                          ) {
+                              #print "\nskipping because metadata exists\n";
                               continue;
                         }
+
+                        // if( ! isset( $courier_method_translation[$courier_method] ) 
+                        //       or empty($tracking_number) 
+                        //       or ( 
+                        //             isset($meta_values['_aftership_tracking_number'])
+                        //             and ! empty($meta_values['_aftership_tracking_number'][0])
+                        //             )
+                        //   ) {
+                        //       print "\nskipping\n";
+                        //       continue;
+                        // }                        
+                        
+                        #exit;
 
                         $aftership_method = $courier_method_translation[$courier_method];
                         #$aftership = new AfterShip();
@@ -113,13 +145,13 @@ function dirty_admin(){
                         #$_POST['aftership_tracking_provider'] = $aftership_method;
                         #$aftership->aftership_fields = $aftership_fields;
                         #$aftership->save_meta_box( $post_id, '' );
-                        #$meta_values = get_post_meta( $post_id );
+
                         #$_POST['aftership_tracking_provider'] = $aftership_method;
                         update_post_meta($post_id, '_aftership_tracking_provider', $aftership_method);
                         update_post_meta($post_id, '_aftership_tracking_number', $tracking_number);
                         #print "updated $post_id with $tracking_number";
                         $order = new WC_Order($post_id);
-                        $order->update_status('wc-completed', 'your order is complete. $tracking_number');
+                        $order->update_status('wc-completed', "your order is complete. $tracking_number");
                         #exit;
                         #if( ! empty($meta_values['_aftership_tracking_number'] )
                         #if( isset( $meta_values['_aftership_tracking_provider'] ) 
