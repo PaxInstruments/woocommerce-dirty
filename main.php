@@ -1,8 +1,8 @@
 <?php
 /**
- * Plugin Name: Dirty Filler
+ * Plugin Name: Dirty Fulfillment
  * Plugin URI: http://paxinstruments.com
- * Description: Exports woo stuff
+ * Description: Exports orders and imports orders
  * Version: 1.0.0
  * Author: Paxintruments
  * Author URI: http://github.com/paxinstruments
@@ -11,7 +11,7 @@
  */
 
 /*
- with many thanks to 
+Derived from: 
 === WooCommerce Simply Order Export ===
 Contributors: ankitgadertcampcom
 Donate link: http://sharethingz.com
@@ -22,9 +22,11 @@ Stable tag: 1.1.5
 License: GPLv2 or later (of-course)
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 */
+#$path = plugin_dir_path( __FILE__ );
 
-
-
+#require($path.'../aftership-woocommerce-tracking/aftership-fields.php');
+#print_r($aftership_fields );
+#exit;
 
 add_action('admin_menu', 'dirty_admin');
 
@@ -43,6 +45,8 @@ $dirty_order_product = array("Product # Qty", "Product # Price", "Product # Name
 
 function dirty_admin(){
 	global $country_code;
+      global $courier_method_translation;
+      global $aftership_fields;
       
 	if(! empty($_POST)){
             
@@ -77,22 +81,73 @@ function dirty_admin(){
                   exit;
 		}
             elseif (isset($_POST['action']) and ! empty($_FILES) and $_POST['action'] == 'wpg_dirty_order_import') {
-                  print "<pre>show arrah:";
+                  #print "<pre>show arrah:";
                   $upload_dir =   wp_upload_dir();
                   $filename   =   $upload_dir['basedir']. '/dirty_order_import.csv';
                   
-                  print_r($_FILES);
-                  print_r($_POST);
+                  #print_r($_FILES);
+                  #print_r($_POST);
 
                   $move_result = move_uploaded_file($_FILES['dirty_processing']['tmp_name'], $filename);
                   $f = fopen($filename, 'r');
                   $csv_data = array();
-                  while($line = fgetcsv($f)){
-                        array_push($csv_data, $line);
-                  }
 
-                  html_show_array($csv_data);
-                  print "</pre>";
+
+
+                  while($line = fgetcsv($f)){
+                        #TODO: there is probaly a better way to handle this
+                        array_push($csv_data, $line);
+
+                        $post_id = $line[0];
+                        $courier_method = $line[11];
+                        $tracking_number = $line[12];
+
+                        if( ! isset( $courier_method_translation[$courier_method] ) 
+                              or empty($tracking_number) ) {
+                              continue;
+                        }
+
+                        $aftership_method = $courier_method_translation[$courier_method];
+                        #$aftership = new AfterShip();
+
+                        #$_POST['aftership_tracking_provider'] = $aftership_method;
+                        #$aftership->aftership_fields = $aftership_fields;
+                        #$aftership->save_meta_box( $post_id, '' );
+                        #$meta_values = get_post_meta( $post_id );
+                        #$_POST['aftership_tracking_provider'] = $aftership_method;
+                        update_post_meta($post_id, '_aftership_tracking_provider', $aftership_method);
+                        update_post_meta($post_id, '_aftership_tracking_number', $tracking_number);
+                        #print "updated $post_id with $tracking_number";
+                        $order = new WC_Order($post_id);
+                        $order->update_status('wc-completed', 'your order is complete. $tracking_number');
+                        #exit;
+                        #if( ! empty($meta_values['_aftership_tracking_number'] )
+                        #if( isset( $meta_values['_aftership_tracking_provider'] ) 
+                        #      and ! empty($meta_values['_aftership_tracking_number'])
+                        #      and ! empty($tracking_number) ){
+                        #      print "update tracking of %s with  %s " % ($post_id, $tracking_number );
+                        #      exit;
+                              #$_POST['aftership_tracking_provider'] = '';
+                              #update_post_meta($post_id, '_aftership_tracking_number', $tracking_number);
+                        #}
+                        
+                  }
+                  #update_post_meta($post_id, $meta_key, $meta_value, $prev_value)
+                  #print "order id ".$csv_data[1][0];
+                  #print "order id ".$csv_data[1][12]; #tracking
+                  #$meta_values = get_post_meta( $csv_data[1][0] );
+                  #$meta_values = get_post_meta(999); #$csv_data[1][0] );
+                  #if tracking 
+                  #if(isset($meta_values['_aftership_tracking_provider'])){
+                  #      $_POST['aftership_tracking_provider'] = '';
+                  #      update_post_meta($post_id, '_aftership_tracking_number', N!!!!N);
+                  #}
+                  
+                  #$order_meta = new WC_Order( $csv_data[1][0] );
+                  #print_r($meta_values);
+
+                  #html_show_array($csv_data);
+                  #print "</pre>";
                   fclose($f);
 
             }
@@ -102,6 +157,9 @@ function dirty_admin(){
 	add_menu_page('Dirty Filler', 'Dirty Filler', 'read', 'dirty-filler', 'dirty_filler');
 }
 
+function csv_to_array($csvfile, $abc){
+
+}
 
 function dirty_filler(){
 	print "<h2>Export paid orders</h2>";
@@ -331,9 +389,9 @@ function get_dirty_order_data() {
 
             #$order_details->get_shipping_methods(); gets more details
             $shipping_method = $order_details->get_shipping_method();
-            print "meta:"; print_r($meta);
+            #print "meta:"; print_r($meta);
 
-            exit;
+            #exit;
 
 		$ship = array( $order_id ,
 			$meta['_billing_email'][0],
@@ -633,6 +691,9 @@ $country_code = array(
       'ZW' => 'Zimbabwe' );
 
 
+$courier_method_translation = array(
+      'International DHL (2~3 business days)' => 'dhl'
+);
 
 function html_show_array($table){
       echo "<table border='1'>";
