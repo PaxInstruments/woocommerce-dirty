@@ -52,7 +52,7 @@ function dirty_admin(){
             
 		#print_r($_POST);
 		if(isset($_POST['action']) and $_POST['action'] == 'wpg_dirty_order_export'){
-                  print "<pre>show arrah:";
+                  #print "<pre>show arrah:";
 
                   #html_show_array(get_dirty_order_data());
                   #exit;
@@ -81,7 +81,7 @@ function dirty_admin(){
                   exit;
 		}
             elseif (isset($_POST['action']) and ! empty($_FILES) and $_POST['action'] == 'wpg_dirty_order_import') {
-                  #print "<pre>show arrah:";
+                  #print "<pre>show array:";
                   $upload_dir =   wp_upload_dir();
                   $filename   =   $upload_dir['basedir']. '/dirty_order_import.csv';
                   
@@ -110,10 +110,11 @@ function dirty_admin(){
                         #print_r($meta_values); 
                         #print "here $post_id $meta_values <pre>";
                         #print_r($meta_values);
-
+                        #print $courier_method_translation[$courier_method];
                         if( ! isset( $courier_method_translation[$courier_method] ) 
                               or empty($tracking_number) ){
                                     #print "\nskipping because tracking number missing or method not found.\n";
+                                    #print_r($line);
                                continue;
                               }
 
@@ -179,6 +180,7 @@ function dirty_admin(){
                   #print_r($meta_values);
 
                   #html_show_array($csv_data);
+                  #exit;
                   #print "</pre>";
                   fclose($f);
 
@@ -724,7 +726,7 @@ $country_code = array(
 
 
 $courier_method_translation = array(
-      'International DHL (2~3 business days)' => 'dhl'
+      'DHL Express (2~3 business days)' => 'dhl'
 );
 
 function html_show_array($table){
