@@ -3,7 +3,7 @@
  * Plugin Name: Dirty Fulfillment
  * Plugin URI: http://paxinstruments.com
  * Description: Exports orders and imports orders
- * Version: 1.0.0
+ * Version: 0.2.1
  * Author: Paxintruments
  * Author URI: http://github.com/paxinstruments
  * License: GPL2
