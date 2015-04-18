@@ -214,16 +214,16 @@ function dirty_filler(){
 		<input type='file' name='dirty_processing' id='dirty_processing' />
             <input type="hidden" name="action" value="wpg_dirty_order_import" />
             <input type='submit' value='Import Orders'>
-	</form><br><br><br><hr><pre>
+	</form><br><br><br>DEBUG<hr><pre>
 	<?php
       #$woocommerce = function_exists('WC') ? WC() : $GLOBALS['woocommerce'];
       #$shippingCountries = method_exists($woocommerce->countries, 'get_shipping_countries')
       #                              ? $woocommerce->countries->get_shipping_countries()
       #                              : $woocommerce->countries->countries;
       #print_r($shippingCountries);
-      #$hkp_settings = get_option('woocommerce_awd_shipping2_settings');
+      $hkp_settings = get_option('paxmanchris_debug');
       #$results = json_decode($hkp_settings);
-      #print_r($hkp_settings);
+      print_r($hkp_settings);
 }
 
 #$dirty_info = array('_shipping_first_name', );
