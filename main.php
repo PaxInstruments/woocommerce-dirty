@@ -736,9 +736,6 @@ $country_code = array(
 $courier_method_translation = array(
       'DHL Express (2~3 business days)' => 'dhl',
       'Hong Kong Post' => 'hong-kong-post'
-
-      "slug": "hong-kong-post",
-                "name": "Hong Kong Post",
 );
 
 function html_show_array($table){
