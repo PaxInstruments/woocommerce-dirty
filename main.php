@@ -153,6 +153,7 @@ function dirty_admin(){
                         #print "updated $post_id with $tracking_number";
                         $order = new WC_Order($post_id);
                         $order->update_status('wc-completed', "your order is complete. $tracking_number");
+
                         #exit;
                         #if( ! empty($meta_values['_aftership_tracking_number'] )
                         #if( isset( $meta_values['_aftership_tracking_provider'] ) 
@@ -188,7 +189,7 @@ function dirty_admin(){
 	}
 
 
-	add_menu_page('Dirty Filler', 'Dirty Filler', 'read', 'dirty-filler', 'dirty_filler');
+	add_menu_page('Dirty Fulfillment', 'Dirty Fulfillment', 'read', 'dirty-filler', 'dirty_filler');
 }
 
 function csv_to_array($csvfile, $abc){
@@ -215,7 +216,14 @@ function dirty_filler(){
             <input type='submit' value='Import Orders'>
 	</form><br><br><br><hr><pre>
 	<?php
-
+      #$woocommerce = function_exists('WC') ? WC() : $GLOBALS['woocommerce'];
+      #$shippingCountries = method_exists($woocommerce->countries, 'get_shipping_countries')
+      #                              ? $woocommerce->countries->get_shipping_countries()
+      #                              : $woocommerce->countries->countries;
+      #print_r($shippingCountries);
+      #$hkp_settings = get_option('woocommerce_awd_shipping2_settings');
+      #$results = json_decode($hkp_settings);
+      #print_r($hkp_settings);
 }
 
 #$dirty_info = array('_shipping_first_name', );
@@ -726,7 +734,11 @@ $country_code = array(
 
 
 $courier_method_translation = array(
-      'DHL Express (2~3 business days)' => 'dhl'
+      'DHL Express (2~3 business days)' => 'dhl',
+      'Hong Kong Post' => 'hong-kong-post'
+
+      "slug": "hong-kong-post",
+                "name": "Hong Kong Post",
 );
 
 function html_show_array($table){
