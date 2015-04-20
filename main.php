@@ -221,9 +221,13 @@ function dirty_filler(){
       #                              ? $woocommerce->countries->get_shipping_countries()
       #                              : $woocommerce->countries->countries;
       #print_r($shippingCountries);
-      $hkp_settings = get_option('paxmanchris_debug');
+      #$hkp_settings = get_option('paxmanchris_debug');
       #$results = json_decode($hkp_settings);
-      print_r($hkp_settings);
+      #print_r($hkp_settings);
+      $args = array( 'post_type'=>'product' );
+
+      $orders = new WP_Query( $args );
+      print_r($orders);
 }
 
 #$dirty_info = array('_shipping_first_name', );
@@ -751,4 +755,24 @@ function html_show_array($table){
       }
       echo "</table>";
 }
-?>
+
+
+
+add_filter('post_type_link', 'wpse33551_post_type_link', 1, 3);
+
+function wpse33551_post_type_link( $link, $post = 0 ){
+    if ( $post->post_type == 'product' ){
+        return home_url( 'product/' . $post->ID );
+    } else {
+        return $link;
+    }
+}
+
+add_action( 'init', 'wpse33551_rewrites_init' );
+
+function wpse33551_rewrites_init(){
+    add_rewrite_rule(
+        'product/([0-9]+)?$',
+        'index.php?post_type=product&p=$matches[1]',
+        'top' );
+}
