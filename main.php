@@ -768,11 +768,18 @@ function wpse33551_post_type_link( $link, $post = 0 ){
     }
 }
 
-add_action( 'init', 'wpse33551_rewrites_init' );
+
 
 function wpse33551_rewrites_init(){
+      #'products/([0-9]+)?$',
+      #'^products/([0-9]+)/?',
+      #'product/([0-9]+)?.*?$',
+    #flush_rewrite_rules();
     add_rewrite_rule(
-        'product/([0-9]+)?$',
+        '^product/([0-9]+)?$',
         'index.php?post_type=product&p=$matches[1]',
         'top' );
+
 }
+add_action( 'init', 'wpse33551_rewrites_init' );
+
