@@ -757,7 +757,7 @@ function html_show_array($table){
 }
 
 
-
+## for handling redirects for products
 add_filter('post_type_link', 'wpse33551_post_type_link', 1, 3);
 
 function wpse33551_post_type_link( $link, $post = 0 ){
@@ -769,17 +769,24 @@ function wpse33551_post_type_link( $link, $post = 0 ){
 }
 
 
+add_action( 'init', 'wpse33551_rewrites_init' );
 
 function wpse33551_rewrites_init(){
-      #'products/([0-9]+)?$',
-      #'^products/([0-9]+)/?',
-      #'product/([0-9]+)?.*?$',
-    #flush_rewrite_rules();
     add_rewrite_rule(
         '^product/([0-9]+)?$',
         'index.php?post_type=product&p=$matches[1]',
         'top' );
 
 }
-add_action( 'init', 'wpse33551_rewrites_init' );
+
+
+## for handling auto sku values based on product id (same as post_id)
+function sv_change_sku_value( $sku, $product ) {
+
+    // Change the generated SKU to use the product's post ID instead of the slug
+    $sku = $product->get_post_data()->ID;
+    return $sku;
+}
+add_filter( 'wc_sku_generator_sku', 'sv_change_sku_value', 10, 2 );
+
 
