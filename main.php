@@ -197,10 +197,34 @@ function dirty_filler(){
       #$hkp_settings = get_option('paxmanchris_debug');
       #$results = json_decode($hkp_settings);
       #print_r($hkp_settings);
-      $args = array( 'post_type'=>'product' );
+      
+      #$args = array( 'post_type'=>'product' );
 
-      $orders = new WP_Query( $args );
-      print_r($orders);
+      #$orders = new WP_Query( $args );
+      #print_r($orders);
+
+      $js = '(function(e,t,n){var r,i=e.getElementsByTagName(t)[0];if(e.getElementById(n))return;r=e.createElement(t);r.id=n;r.src="//apps.aftership.com/all.js";i.parentNode.insertBefore(r,i)})(document,"script","aftership-jssdk")';
+      #if (function_exists('wc_enqueue_js')) {
+      #    wc_enqueue_js($js);
+      #} else {
+      #    global $woocommerce;
+      #    $woocommerce->add_inline_js($js);
+      #}
+
+      $track_button = '<div id="as-root"></div><div class="as-track-button" data-slug="dhl" data-tracking-number="' . 
+      '23456yt54r' . '" data-support="true" data-width="400" data-size="normal" data-hide-tracking-number="true"></div>';
+
+
+      #print $track_button;
+
+      $ret = wp_mail("djfsodfkjsdfkjlsd@mailinator.com", 'subject', "message <script>$js</script>$track_button");
+      if(! $ret){
+            print "failed, idk why!!!";
+      } else {
+            print "success!";
+      }
+
+
 }
 
 #$dirty_info = array('_shipping_first_name', );
@@ -521,13 +545,13 @@ function wpse33551_rewrites_init(){
 ######
 ## for handling auto sku values based on product id (same as post_id)
 ######
-
-function sv_change_sku_value( $sku, $product ) {
-
-    // Change the generated SKU to use the product's post ID instead of the slug
-    $sku = $product->get_post_data()->ID;
-    return $sku;
-}
+# moved to theme functions
+#function sv_change_sku_value( $sku, $product ) {
+#
+#    // Change the generated SKU to use the product's post ID instead of the slug
+#    $sku = $product->get_post_data()->ID;
+#    return $sku;
+#}
 #add_filter( 'wc_sku_generator_sku', 'sv_change_sku_value', 10, 2 );
 
 
