@@ -194,9 +194,9 @@ function dirty_filler(){
       #                              ? $woocommerce->countries->get_shipping_countries()
       #                              : $woocommerce->countries->countries;
       #print_r($shippingCountries);
-      #$hkp_settings = get_option('paxmanchris_debug');
+      $hkp_settings = get_option('paxmanchris_debug');
       #$results = json_decode($hkp_settings);
-      #print_r($hkp_settings);
+      print_r($hkp_settings);
       
       #$args = array( 'post_type'=>'product' );
 
@@ -217,11 +217,11 @@ function dirty_filler(){
 
       #print $track_button;
 
-      $ret = wp_mail("djfsodfkjsdfkjlsd@mailinator.com", 'subject', "message <script>$js</script>$track_button");
+      $ret = wp_mail("djfsodfkjsdfkjlsd@mailinator.com", 'from test', "message <a href=\"https://track.aftership.com/1ZA2R3170497077020\">Track your package </a>");
       if(! $ret){
             print "failed, idk why!!!";
       } else {
-            print "success!";
+            print "success! but did it really. wtf is going on!";
       }
 
 
@@ -513,6 +513,65 @@ function html_show_array($table){
       }
       echo "</table>";
 }
+
+
+
+#add_action('aftership_meta_saved', 'aftership_meta_saved_handle');
+
+###
+# add action to handle mailing user if tracking gets updated
+# -1 priority to load before aftership does, so we can see the tracking update
+###
+add_action('woocommerce_process_shop_order_meta', 'aftership_meta_saved_handle', -1, 2); # post_id, post
+#add_action( 'woocommerce_new_customer_note_notification', array( $this, 'trigger' ) );
+
+function aftership_meta_saved_handle($data, $post_info){
+      global $woocommerce;
+#function aftership_meta_saved_handle($post_id){
+      #set_option('paxmanchris_debug', $data);
+      
+      
+      #print" <pre>- post:\n";
+      #print_r($_POST);exit;
+          #[aftership_tracking_provider] => dhl
+          #[aftership_tracking_provider_name] => DHL Express
+          #[aftership_tracking_required_fields] => 
+          #[aftership_tracking_number] => 2323423
+      $post_meta = get_post_meta($_POST['post_ID']);
+      $current_tracking = $post_meta['_aftership_tracking_number'][0] ;
+      $new_tracking = $_POST['aftership_tracking_number'];
+      $new_method = $_POST['aftership_tracking_provider_name'];#array_pop($_POST['aftership_tracking_method']);
+      #print "results: $current_tracking =? $new_tracking\npost meta:\n ";
+      #print_r($post_meta);
+      if(isset($_POST['aftership_tracking_number'])
+            and $current_tracking != $new_tracking){
+            $tracking_message=array();
+            #$tracking_message['order_id'] = $_POST['post_ID'];
+            $tracking_message = "
+                  Your package has been shipped via $new_method.<br> 
+                  Your tracking number is <a href=\"https://track.aftership.com/".
+                  $_POST['aftership_tracking_number']
+                  ."\">".$_POST['aftership_tracking_number']."</a>.
+            ";
+            #"message <a href=\"https://track.aftership.com/1ZA2R3170497077020\">Track your package </a>"
+             print_r($tracking_message);
+            #$email_note = new WC_Order($_POST['post_ID']);
+             
+            # this uses the woocommerse note system, this will activate a email.
+            $of = new WC_Order_Factory();
+            $email_note = $of->get_order( $_POST['post_ID'] );
+            $email_note->add_order_note($tracking_message, 1);
+      }
+      #print $data_r;
+      #exit;
+      #$ret = wp_mail("djfsodfkjsdfkjlsd@mailinator.com", 'from aftership', "$data_r");
+      #if(! $ret){
+      #      print "failed add action, idk why!!!";
+      #} else {
+      #      print "success add action!";
+      #}
+}
+
 
 #####
 ## for handling redirects for products
