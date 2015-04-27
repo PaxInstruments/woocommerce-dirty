@@ -30,7 +30,7 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 add_action('admin_menu', 'dirty_admin');
 
-
+$dirty_import_results = array();
 
 
 $dirty_order_header = array( "Order ID",	"Customer Email",	"Delivery Name", "Company", 
@@ -47,6 +47,7 @@ function dirty_admin(){
 	global $country_code;
       global $courier_method_translation;
       global $aftership_fields;
+      global $dirty_import_results;
       
 	if(! empty($_POST)){
             
@@ -63,7 +64,7 @@ function dirty_admin(){
                   exit;
 		}
             elseif (isset($_POST['action']) and ! empty($_FILES) and $_POST['action'] == 'wpg_dirty_order_import') {
-                  #print "<pre>show array:\n";
+                  print "<pre>show array:\n";
                   $upload_dir =   wp_upload_dir();
                   $filename   =   $upload_dir['basedir']. '/dirty_order_import.csv';
                   
@@ -73,8 +74,10 @@ function dirty_admin(){
                   $move_result = move_uploaded_file($_FILES['dirty_processing']['tmp_name'], $filename);
                   
                   $cvs_data = csv_to_array($filename);
-
+                  #print_r($cvs_data);exit;
                   foreach ($cvs_data as $row) {
+                        $dirty_results = array();
+
                         #print $row['Ship Dest Type'];
                         $post_id = $row['Order ID'];
                         $courier_method =  $row['Shipping Method'];
@@ -82,13 +85,17 @@ function dirty_admin(){
                         $order_status = $row['Status'];
 
                         $order = new WC_Order($post_id);
-                        #print "$post_id, $courier_method, $tracking_number, $order_status \n ";
+                        print "$post_id, $courier_method, $tracking_number, $order_status \n ";
                         #print_r($order);
                         #print $order->get_status();
                         #exit;
 
+                        #print "status:".$order->get_status()."\n";
                         if($order->get_status() == 'completed'){
                               #order has already been proccessed 
+                              $dirty_import_results[] = array(
+                                    'post_id' => $post_id,
+                                    'message'=>'order has already been proccessed');
                               continue;
                         }
 
@@ -97,36 +104,60 @@ function dirty_admin(){
                         if(   strtolower($order_status) != 'completed'
                               or ! isset( $courier_method_translation[$courier_method] ) 
                               ){
-                                    #print "\nskipping because tracking number missing or method not found.\n";
+                                    #print "\nskipping because order status '$order_status' or method '$courier_method' not found.\n";
                                     #print_r($line);
+                              $dirty_import_results[] = array(
+                                    'post_id' => $post_id,
+                                    'message'=>"skipping because order status '$order_status' is not complete or method '$courier_method' not found.");
                                continue;
                               }
+                        # we should still update the status to complete
+                        # if the order is in the state of not processing yet some how has tracking attached to it
+                        // if( 
+                        //       isset($meta_values['_aftership_tracking_number'])
+                        //       and ! empty($meta_values['_aftership_tracking_number'][0])
 
-                        if( 
-                              isset($meta_values['_aftership_tracking_number'])
-                              and ! empty($meta_values['_aftership_tracking_number'][0])
+                        //   ) {
+                        //       print "\nskipping because tracking ".$meta_values['_aftership_tracking_number'][0]." exists\n" ;
 
-                          ) {
-                              #print "\nskipping because metadata exists\n";
-                              continue;
-                        }
+                        //       $dirty_import_results[] = array(
+                        //             'post_id' => $post_id
+                        //             'message'=>"skipping because tracking ".$meta_values['_aftership_tracking_number'][0]." exists" );
+                        //       continue;
+                        // }
 
                         $message = "Your order is complete and has been shipped via $courier_method.";
 
-                        if(! empty($tracking_number) ) {
+                        
+
+                        if(! empty($tracking_number) 
+                                   and ( ! isset($meta_values['_aftership_tracking_number'])
+                                          or empty($meta_values['_aftership_tracking_number'][0])
+                                    )
+                              ) {
                               $aftership_method = $courier_method_translation[$courier_method];
 
                               update_post_meta($post_id, '_aftership_tracking_provider', $aftership_method);
                               update_post_meta($post_id, '_aftership_tracking_number', $tracking_number);
-                              $message .= "<br>your tracking number is $tracking_number";
+                              $message .= "<br>your tracking number is <a href=\"https://track.aftership.com/$tracking_number\">$tracking_number</a>";
+                              $dirty_results['Post_id'] = $post_id;
 
+                        } else {
+                              $dirty_import_results[] = array(
+                                    'post_id' => $post_id,
+                                    'message'=>"not updating tracking, becasue tracking number is empty or there is existing tracking" );
                         }
 
                         
                         $order->update_status('wc-completed', "$message");
 
+                        #$dirty_results['Post_id'] = $post_id;
+                        #$dirty_results['Post_id'] = $post_id;
+
+                        
+
                   }
- 
+                  exit;
             }
 	}
 
@@ -170,6 +201,7 @@ function csv_to_array( $csvfile ){
 }
 
 function dirty_filler(){
+      global $dirty_import_results;
 	print "<h2>Export paid orders</h2>";
 ?>
 	<form method='post' id='mainform' action>
@@ -189,21 +221,25 @@ function dirty_filler(){
             <input type='submit' value='Import Orders'>
 	</form><br><br><br>DEBUG<hr><pre>
 	<?php
+      if(!empty($dirty_import_results)){
+            print_r($dirty_import_results);
+            $dirty_import_results=array();
+      }
       #$woocommerce = function_exists('WC') ? WC() : $GLOBALS['woocommerce'];
       #$shippingCountries = method_exists($woocommerce->countries, 'get_shipping_countries')
       #                              ? $woocommerce->countries->get_shipping_countries()
       #                              : $woocommerce->countries->countries;
       #print_r($shippingCountries);
-      $hkp_settings = get_option('paxmanchris_debug');
+      #$hkp_settings = get_option('paxmanchris_debug');
       #$results = json_decode($hkp_settings);
-      print_r($hkp_settings);
+      #print_r($hkp_settings);
       
       #$args = array( 'post_type'=>'product' );
 
       #$orders = new WP_Query( $args );
       #print_r($orders);
 
-      $js = '(function(e,t,n){var r,i=e.getElementsByTagName(t)[0];if(e.getElementById(n))return;r=e.createElement(t);r.id=n;r.src="//apps.aftership.com/all.js";i.parentNode.insertBefore(r,i)})(document,"script","aftership-jssdk")';
+      #$js = '(function(e,t,n){var r,i=e.getElementsByTagName(t)[0];if(e.getElementById(n))return;r=e.createElement(t);r.id=n;r.src="//apps.aftership.com/all.js";i.parentNode.insertBefore(r,i)})(document,"script","aftership-jssdk")';
       #if (function_exists('wc_enqueue_js')) {
       #    wc_enqueue_js($js);
       #} else {
@@ -211,18 +247,18 @@ function dirty_filler(){
       #    $woocommerce->add_inline_js($js);
       #}
 
-      $track_button = '<div id="as-root"></div><div class="as-track-button" data-slug="dhl" data-tracking-number="' . 
-      '23456yt54r' . '" data-support="true" data-width="400" data-size="normal" data-hide-tracking-number="true"></div>';
+      #$track_button = '<div id="as-root"></div><div class="as-track-button" data-slug="dhl" data-tracking-number="' . 
+      #'23456yt54r' . '" data-support="true" data-width="400" data-size="normal" data-hide-tracking-number="true"></div>';
 
 
       #print $track_button;
 
-      $ret = wp_mail("djfsodfkjsdfkjlsd@mailinator.com", 'from test', "message <a href=\"https://track.aftership.com/1ZA2R3170497077020\">Track your package </a>");
-      if(! $ret){
-            print "failed, idk why!!!";
-      } else {
-            print "success! but did it really. wtf is going on!";
-      }
+      #$ret = wp_mail("djfsodfkjsdfkjlsd@mailinator.com", 'from test', "message <a href=\"https://track.aftership.com/1ZA2R3170497077020\">Track your package </a>");
+      #if(! $ret){
+      #      print "failed, idk why!!!";
+      #} else {
+      #      print "success! but did it really. wtf is going on!";
+      #}
 
 
 }
@@ -556,7 +592,7 @@ function aftership_meta_saved_handle($data, $post_info){
             #"message <a href=\"https://track.aftership.com/1ZA2R3170497077020\">Track your package </a>"
              print_r($tracking_message);
             #$email_note = new WC_Order($_POST['post_ID']);
-             
+
             # this uses the woocommerse note system, this will activate a email.
             $of = new WC_Order_Factory();
             $email_note = $of->get_order( $_POST['post_ID'] );
