@@ -64,7 +64,7 @@ function dirty_admin(){
                   exit;
 		}
             elseif (isset($_POST['action']) and ! empty($_FILES) and $_POST['action'] == 'wpg_dirty_order_import') {
-                  print "<pre>show array:\n";
+                  #print "<pre>show array:\n";
                   $upload_dir =   wp_upload_dir();
                   $filename   =   $upload_dir['basedir']. '/dirty_order_import.csv';
                   
@@ -85,7 +85,7 @@ function dirty_admin(){
                         $order_status = $row['Status'];
 
                         $order = new WC_Order($post_id);
-                        print "$post_id, $courier_method, $tracking_number, $order_status \n ";
+                        #print "$post_id, $courier_method, $tracking_number, $order_status \n ";
                         #print_r($order);
                         #print $order->get_status();
                         #exit;
@@ -142,6 +142,10 @@ function dirty_admin(){
                               $message .= "<br>your tracking number is <a href=\"https://track.aftership.com/$tracking_number\">$tracking_number</a>";
                               $dirty_results['Post_id'] = $post_id;
 
+                              $dirty_import_results[] = array(
+                                    'post_id' => $post_id,
+                                    'message'=>"tracking has been updated $tracking_number" );
+
                         } else {
                               $dirty_import_results[] = array(
                                     'post_id' => $post_id,
@@ -151,13 +155,16 @@ function dirty_admin(){
                         
                         $order->update_status('wc-completed', "$message");
 
+                        $dirty_import_results[] = array(
+                                    'post_id' => $post_id,
+                                    'message'=>"Order has been set to completed." );
                         #$dirty_results['Post_id'] = $post_id;
                         #$dirty_results['Post_id'] = $post_id;
 
                         
 
                   }
-                  exit;
+                  #exit;
             }
 	}
 
