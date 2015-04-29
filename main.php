@@ -136,7 +136,7 @@ function dirty_admin(){
                                     )
                               ) {
                               $aftership_method = $courier_method_translation[$courier_method];
-
+                              update_post_meta($post_id, '_aftership_tracking_provider_name', $courier_method);
                               update_post_meta($post_id, '_aftership_tracking_provider', $aftership_method);
                               update_post_meta($post_id, '_aftership_tracking_number', $tracking_number);
                               $message .= "<br>your tracking number is <a href=\"https://track.aftership.com/$tracking_number\">$tracking_number</a>";
@@ -618,17 +618,17 @@ function aftership_meta_saved_handle($data, $post_info){
 
 #####
 ## for handling redirects for products
-#####
+##### moved to theme functions
 
 #add_filter('post_type_link', 'wpse33551_post_type_link', 1, 3);
 
-function wpse33551_post_type_link( $link, $post = 0 ){
-    if ( $post->post_type == 'product' ){
-        return home_url( 'product/' . $post->ID );
-    } else {
-        return $link;
-    }
-}
+#function wpse33551_post_type_link( $link, $post = 0 ){
+#    if ( $post->post_type == 'product' ){
+#        return home_url( 'product/' . $post->ID );
+#    } else {
+#        return $link;
+#    }
+#}
 
 /*
 add_action( 'init', 'wpse33551_rewrites_init' );
