@@ -229,8 +229,11 @@ function dirty_filler(){
 	</form><br><br><br>DEBUG<hr><pre>
 	<?php
       if(!empty($dirty_import_results)){
-            print_r($dirty_import_results);
+            #print_r($dirty_import_results);
+            print "<h2>Import Results:</h2>";
+            html_show_array($dirty_import_results);
             $dirty_import_results=array();
+
       }
       #$woocommerce = function_exists('WC') ? WC() : $GLOBALS['woocommerce'];
       #$shippingCountries = method_exists($woocommerce->countries, 'get_shipping_countries')
@@ -455,7 +458,7 @@ function get_dirty_order_data() {
 
 
 	$orders = new WP_Query( $args );
-      print "<pre>";
+      #print "<pre>";
 
 	if(! $orders->have_posts() ){
             #print "no orders";
@@ -531,7 +534,7 @@ function get_dirty_order_data() {
             $all_items[0] = array_merge($all_items[0], $dop);
       }
       
-      print_r($all_items);
+      #print_r($all_items);
 	return $all_items;
 }
 
@@ -616,44 +619,5 @@ function aftership_meta_saved_handle($data, $post_info){
 }
 
 
-#####
-## for handling redirects for products
-##### moved to theme functions
-
-#add_filter('post_type_link', 'wpse33551_post_type_link', 1, 3);
-
-#function wpse33551_post_type_link( $link, $post = 0 ){
-#    if ( $post->post_type == 'product' ){
-#        return home_url( 'product/' . $post->ID );
-#    } else {
-#        return $link;
-#    }
-#}
-
-/*
-add_action( 'init', 'wpse33551_rewrites_init' );
-
-function wpse33551_rewrites_init(){
-    add_rewrite_rule(
-        //'^products/([0-9]+)?$',
-            'products/([0-9]+)?$',
-        'index.php?product=$matches[1]',
-       // 'index.php?post_type=product&p=$matches[1]',
-        'top' );
-
-}
-*/
-
-######
-## for handling auto sku values based on product id (same as post_id)
-######
-# moved to theme functions
-#function sv_change_sku_value( $sku, $product ) {
-#
-#    // Change the generated SKU to use the product's post ID instead of the slug
-#    $sku = $product->get_post_data()->ID;
-#    return $sku;
-#}
-#add_filter( 'wc_sku_generator_sku', 'sv_change_sku_value', 10, 2 );
 
 
