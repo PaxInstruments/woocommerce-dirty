@@ -542,7 +542,7 @@ function get_dirty_order_data() {
 
 
 $courier_method_translation = array(
-      'DHL Express (2~3 business days)' => 'dhl',
+      'DHL Express' => 'dhl',
       'Hong Kong Post' => 'hong-kong-post'
 );
 
